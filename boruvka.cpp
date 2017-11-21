@@ -56,17 +56,16 @@ class Node
 {
   private:
     int id;
-    vector<pair<Node *, int> > edges;
+    vector<pair<Node *, int>> edges;
     double totWeight;
     long numEdges;
     bool isAlive;
 
   public:
-  mutex lock;
+    mutex lock;
     Node(int node_id)
     {
         id = node_id;
-        // edges = new Edge[MAX_EDGES];
         totWeight = 0;
         numEdges = 0;
         isAlive = true;
@@ -76,7 +75,7 @@ class Node
     long getNumEdges() { return numEdges; }
     bool getStatus() { return isAlive; }
     void setStatus(bool y) { isAlive = y; }
-    vector<pair<Node *, int> > getEdgeList() { return edges; }
+    vector<pair<Node *, int>> getEdgeList() { return edges; }
     void changeElem(int i, Node *n) { edges[i].first = n; }
 
     void Union(Node *to, int weight)
@@ -110,12 +109,10 @@ class Node
             while (i < edges.size())
             {
                 pair<Node *, int> e = edges[i];
-                // if((e.getFrom()!=this && e.getFrom() != other) || (e.getTo()!=this && e.getTo() != other))break;
                 if ((e.first) != other)
                     break;
                 else
                 {
-                    // cout<<"#"<<this->id<<" "<<other->getID()<<" "<<eW<<endl;
                     mstM[this->id][other->getID()] = eW;
                 }
                 i++;
@@ -123,12 +120,10 @@ class Node
             while (j < other_edges.size())
             {
                 pair<Node *, int> e = other_edges[j];
-                // if((e.getFrom()!=this && e.getFrom() != other) || (e.getTo()!=this && e.getTo() != other))break;
                 if ((e.first) != this)
                     break;
                 else
                 {
-                    // cout<<"$"<<other->getID()<<" "<<this->id<<" "<<eW<<endl;
                     mstM[other->getID()][this->id] = eW;
                 }
                 j++;
@@ -141,14 +136,12 @@ class Node
                 {
                     if (ef[k].first == other)
                     {
-                        // cout<<x->getID()<<endl;
                         x->changeElem(k, this);
                         break;
                     }
                 }
                 newSet.push_back(other_edges[j]);
                 j++;
-                // newSet.push_back(*(other_edges[j++].replaceComponent(other,this)));
             }
             else if (i < edges.size())
             {
@@ -164,7 +157,6 @@ class Node
                 }
                 newSet.push_back(edges[i]);
                 i++;
-                // newSet.push_back(*(edges[i++].replaceComponent(other,this)));
             }
         }
         other->clearEdgeList();
@@ -199,7 +191,7 @@ void mst(queue<Node *> &nl, int i)
     while (!(nl.empty()))
     {
         n = nl.front();
-        
+
         if (n == NULL || !n->lock.try_lock())
             continue;
         nl.pop();
@@ -210,21 +202,18 @@ void mst(queue<Node *> &nl, int i)
             continue;
         }
 
-
-       
         pair<Node *, int> *e = n->getMinEdge();
         if (e == NULL)
             break;
 
         Node *other = (*e).first;
 
-      
-        if (!other->lock.try_lock()) {
-    		n->lock.unlock();
-    		nl.push(n);
-    		continue;
+        if (!other->lock.try_lock())
+        {
+            n->lock.unlock();
+            nl.push(n);
+            continue;
         }
-
 
         if (!other->getStatus())
         {
@@ -234,11 +223,9 @@ void mst(queue<Node *> &nl, int i)
             continue;
         }
 
-       
         other->setStatus(false);
         n->merge(other, (*e).second);
         weight += (*e).second;
-
 
         other->lock.unlock();
         n->lock.unlock();
@@ -246,14 +233,12 @@ void mst(queue<Node *> &nl, int i)
     }
 }
 
-
 int main()
 {
     queue<Node *> myqueue;
     int num_vertices, num_edges;
     vector<Node *> collect;
     cin >> num_vertices >> num_edges;
-    //sadjM = createAdjMat();
     mstM = createAdjMat();
     for (int i = 0; i < num_vertices; i++)
     {
@@ -267,16 +252,14 @@ int main()
         cin >> x >> y >> z;
         collect[x - 1]->Union(collect[y - 1], z);
         collect[y - 1]->Union(collect[x - 1], z);
-       // adjM[x - 1][y - 1] = z;
-        // collect[y]->Union(collect[x],z);
+        adjM[x - 1][y - 1] = z;
     }
-  //  printAdjM(adjM);
+    printAdjM(adjM);
     for (int i = 0; i < collect.size(); i++)
     {
         myqueue.push(collect[i]);
     }
-    // print_graph(collect);
-    // cout<<"The edges in mst are:- "<<endl;
+
     int N = 5;
     std::chrono::time_point<std::chrono::system_clock> start, end;
     std::chrono::duration<double> elapsed_seconds;
@@ -289,12 +272,12 @@ int main()
     }
     for (int i = 0; i < N; i++)
         TV[i].join();
-        
+
     end = std::chrono::system_clock::now();
     elapsed_seconds = end - start;
     cout << "Time taken: " << elapsed_seconds.count() << " ";
 
-    //printAdjM(mstM);
+    printAdjM(mstM);
     cout << "Total weight: " << weight;
     return 0;
 }
